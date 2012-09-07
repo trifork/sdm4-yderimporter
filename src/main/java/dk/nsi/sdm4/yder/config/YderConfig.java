@@ -27,11 +27,6 @@ public class YderConfig extends StamdataConfiguration {
 		return new YderregisterParser();
 	}
 
-    @Bean
-    public RecordPersister persister() {
-        return new RecordPersister(Instant.now());
-    }
-
 	// this is not automatically registered, see https://jira.springsource.org/browse/SPR-8539
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
