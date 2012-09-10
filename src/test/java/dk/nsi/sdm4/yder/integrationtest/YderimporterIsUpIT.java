@@ -6,6 +6,6 @@ import org.junit.Test;
 public class YderimporterIsUpIT {
 	@Test
 	public void statusPageReturns200OK() throws Exception {
-		new StatuspageChecker().assertThatStatuspageReturns200OK("yderimporter");
+		new StatuspageChecker("yderimporter").assertThatStatuspageReturns200OK();
 	}
 }
