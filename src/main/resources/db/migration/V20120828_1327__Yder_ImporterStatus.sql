@@ -1,4 +1,4 @@
-CREATE TABLE yderimporterImportStatus (
+ CREATE TABLE IF NOT EXISTS yderimporterImportStatus (
     Id BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
     StartTime DATETIME NOT NULL,
     EndTime DATETIME,

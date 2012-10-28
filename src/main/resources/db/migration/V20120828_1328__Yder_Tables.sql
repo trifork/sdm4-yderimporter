@@ -1,4 +1,4 @@
-CREATE TABLE YderregisterKeyValue (
+ CREATE TABLE IF NOT EXISTS YderregisterKeyValue (
     
     `Key` VARCHAR(100) NOT NULL,
     Value VARCHAR(100) NOT NULL
@@ -6,7 +6,7 @@ CREATE TABLE YderregisterKeyValue (
 
 -- Yderregister - yder
 --
-CREATE TABLE Yderregister (
+ CREATE TABLE IF NOT EXISTS Yderregister (
     PID BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
     HistIdYder VARCHAR(16),
     AmtKodeYder VARCHAR(2),
@@ -30,7 +30,7 @@ CREATE TABLE Yderregister (
 
 -- Yderregister - person
 --
-CREATE TABLE YderregisterPerson (
+ CREATE TABLE IF NOT EXISTS YderregisterPerson (
     PID BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
     HistIdPerson VARCHAR(16),
     YdernrPerson VARCHAR(6),
