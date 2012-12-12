@@ -9,13 +9,13 @@
 
 	<artifactId>yderimporter</artifactId>
 	<packaging>war</packaging>
-	<version>4.3-SNAPSHOT</version>
+	<version>4.3</version>
 
     <scm>
         <url>scm:git:git@github.com:trifork/sdm4-yderimporter</url>
         <connection>scm:git:git@github.com:trifork/sdm4-yderimporter.git</connection>
         <developerConnection>scm:git:git@github.com:trifork/sdm4-yderimporter.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>yderimporter-4.3</tag>
   </scm>
     <issueManagement>
         <system>JIRA</system>
