@@ -63,7 +63,7 @@ public class YderregisterParser implements Parser {
     
     @Override
     public void process(File dataSet) throws ParserException {
-        eventHandler = new YderregisterSaxEventHandler(persister);
+        eventHandler = new YderregisterSaxEventHandler(persister, jdbcTemplate);
     
         SLALogItem slaLogItem = slaLogger.createLogItem("YderregisterParser", dataSet != null ? dataSet.getName() : "no input file");
         try {
@@ -88,8 +88,6 @@ public class YderregisterParser implements Parser {
             // Currently we can ensure that we don't import an old version, by looking at the previous
             // version and ensuring that the version number is larger.
             //
-            
-            
             String prevVersion;
             try {
                 prevVersion = jdbcTemplate.queryForObject("select value from YderregisterKeyValue where `key` = '"+VERSION_KEY+"'",String.class);

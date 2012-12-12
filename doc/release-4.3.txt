@@ -1,0 +1,5 @@
+SDM4-Yderimporter 4.3 Release Notes
+=============================
+
+* Fixed NSPSUPPORT-143, Importer for Yderregistret i SDM 3 importerer ikke afgangsdato
+

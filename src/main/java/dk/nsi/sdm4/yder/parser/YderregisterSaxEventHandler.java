@@ -26,13 +26,18 @@
  */
 package dk.nsi.sdm4.yder.parser;
 
+import static java.lang.String.format;
+
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -42,8 +47,6 @@ import dk.nsi.sdm4.core.persistence.recordpersister.Record;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordBuilder;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.yder.recordspecs.YderregisterRecordSpecs;
-
-import static java.lang.String.format;
 
 public class YderregisterSaxEventHandler extends DefaultHandler {
     private static final Logger logger = Logger.getLogger(YderregisterSaxEventHandler.class);
@@ -63,10 +66,13 @@ public class YderregisterSaxEventHandler extends DefaultHandler {
 
     private String versionNumber = null;
     
+    JdbcTemplate jdbcTemplate;
+
     RecordPersister persister;
 
-    public YderregisterSaxEventHandler(RecordPersister persister) {
+    public YderregisterSaxEventHandler(RecordPersister persister, JdbcTemplate jdbcTemplate) {
         this.persister = persister;
+        this.jdbcTemplate = jdbcTemplate;
         yderRecordCount = 0;
         personRecordCount = 0;
         versionNumber = null;
@@ -104,36 +110,92 @@ public class YderregisterSaxEventHandler extends DefaultHandler {
     }
 
     private void parsePerson(Attributes attributes) {
-        Record record = new RecordBuilder(YderregisterRecordSpecs.PERSON_RECORD_TYPE).field("HistIdPerson",
-                getValue(attributes, "HistIdPerson")).field("YdernrPerson",
-                removeLeadingZeroes(attributes.getValue("YdernrPerson"))).field("CprNr", getValue(attributes, "CprNr"))
-                .field("TilgDatoPerson", getValue(attributes, "TilgDatoPerson")).field("AfgDatoPerson",
-                        getValue(attributes, "AfgDatoPerson")).field("PersonrolleKode",
-                        getValue(attributes, "PersonrolleKode")).field("PersonrolleTxt",
-                        getValue(attributes, "PersonrolleTxt")).build();
+    	String histIdPerson = getValue(attributes, "HistIdPerson");
+    	String afgDatoPerson = getValue(attributes, "AfgDatoPerson");
 
+    	// Check if Person already exists
+    	try {
+        	long pid = jdbcTemplate.queryForLong("select Pid from YderregisterPerson where HistIdPerson = ? and ValidTo is null", histIdPerson);
+        	// only updated if found, else Exception is thrown
+			jdbcTemplate.update("UPDATE YderregisterPerson SET ValidTo = ? WHERE pid = ?", persister.getTransactionTime().toDateTime().toDate(), pid);
+    	} catch(EmptyResultDataAccessException e) {
+    		// ignore - row just need to be inserted
+    	}
+
+    	// Insert new record
+        Record record = new RecordBuilder(YderregisterRecordSpecs.PERSON_RECORD_TYPE)
+        		.field("HistIdPerson", histIdPerson)
+        		.field("YdernrPerson", removeLeadingZeroes(attributes.getValue("YdernrPerson")))
+        		.field("CprNr", getValue(attributes, "CprNr"))
+                .field("TilgDatoPerson", getValue(attributes, "TilgDatoPerson"))
+                .field("AfgDatoPerson", afgDatoPerson)
+                .field("PersonrolleKode", getValue(attributes, "PersonrolleKode"))
+                .field("PersonrolleTxt", getValue(attributes, "PersonrolleTxt"))
+                .build();
         try {
             persister.persist(record, YderregisterRecordSpecs.PERSON_RECORD_TYPE);
+            
+            // check if AfgDatoPerson is set - then set ValidTo to that date and close the record at once
+    		if(afgDatoPerson != null && afgDatoPerson.trim().length() > 0) {
+				Date validTo;
+				try {
+					validTo = datoFormatter.parse(afgDatoPerson);
+				} catch (ParseException e) {
+					throw new ParserException(e);
+				}
+				jdbcTemplate.update("UPDATE YderregisterPerson SET ValidTo = ? WHERE HistIdPerson = ? and ValidTo is NULL", validTo, histIdPerson);
+    		}
+            
         } catch (SQLException e) {
             throw new ParserException(e);
         }
     }
 
     private void parseYder(Attributes attributes) {
-        Record record = new RecordBuilder(YderregisterRecordSpecs.YDER_RECORD_TYPE).field("HistIdYder",
-                getValue(attributes, "HistIdYder")).field("AmtKodeYder", getValue(attributes, "AmtKodeYder")).field(
-                "AmtTxtYder", getValue(attributes, "AmtTxtYder")).field("YdernrYder",
-                removeLeadingZeroes(attributes.getValue("YdernrYder"))).field("PrakBetegn",
-                getValue(attributes, "PrakBetegn")).field("AdrYder", getValue(attributes, "AdrYder")).field(
-                "PostnrYder", getValue(attributes, "PostnrYder")).field("PostdistYder",
-                getValue(attributes, "PostdistYder")).field("AfgDatoYder", getValue(attributes, "AfgDatoYder")).field(
-                "TilgDatoYder", getValue(attributes, "TilgDatoYder")).field("HvdSpecKode",
-                getValue(attributes, "HvdSpecKode")).field("HvdSpecTxt", getValue(attributes, "HvdSpecTxt")).field(
-                "HvdTlf", getValue(attributes, "HvdTlf")).field("EmailYder", getValue(attributes, "EmailYder")).field(
-                "WWW", getValue(attributes, "WWW")).build();
 
+    	String histIdYder = getValue(attributes, "HistIdYder");
+    	String afgDatoYder = getValue(attributes, "AfgDatoYder");
+
+    	// Check if Yder already exists
+    	try {
+        	long pid = jdbcTemplate.queryForLong("select Pid from Yderregister where HistIdYder = ? and ValidTo is null", histIdYder);
+        	// only updated if found, else Exception is thrown
+			jdbcTemplate.update("UPDATE Yderregister SET ValidTo = ? WHERE pid = ?", persister.getTransactionTime().toDateTime().toDate(), pid);
+    	} catch(EmptyResultDataAccessException e) {
+    		// ignore - row just need to be inserted
+    	}
+    	
+    	// Insert new record
+        Record record = new RecordBuilder(YderregisterRecordSpecs.YDER_RECORD_TYPE)
+        		.field("HistIdYder", getValue(attributes, "HistIdYder"))
+        		.field("AmtKodeYder", getValue(attributes, "AmtKodeYder"))
+        		.field("AmtTxtYder", getValue(attributes, "AmtTxtYder"))
+        		.field("YdernrYder", removeLeadingZeroes(attributes.getValue("YdernrYder")))
+        		.field("PrakBetegn", getValue(attributes, "PrakBetegn"))
+        		.field("AdrYder", getValue(attributes, "AdrYder"))
+        		.field("PostnrYder", getValue(attributes, "PostnrYder"))
+        		.field("PostdistYder", getValue(attributes, "PostdistYder"))
+        		.field("AfgDatoYder", getValue(attributes, "AfgDatoYder"))
+        		.field("TilgDatoYder", getValue(attributes, "TilgDatoYder"))
+        		.field("HvdSpecKode", getValue(attributes, "HvdSpecKode"))
+        		.field("HvdSpecTxt", getValue(attributes, "HvdSpecTxt"))
+        		.field("HvdTlf", getValue(attributes, "HvdTlf"))
+        		.field("EmailYder", getValue(attributes, "EmailYder"))
+        		.field("WWW", getValue(attributes, "WWW"))
+        		.build();
         try {
             persister.persist(record, YderregisterRecordSpecs.YDER_RECORD_TYPE);
+
+            // check if AfgDatoYder is set - then set ValidTo to that date and close the record at once
+    		if(afgDatoYder != null && afgDatoYder.trim().length() > 0) {
+				Date validTo;
+				try {
+					validTo = datoFormatter.parse(afgDatoYder);
+				} catch (ParseException e) {
+					throw new ParserException(e);
+				}
+				jdbcTemplate.update("UPDATE Yderregister SET ValidTo = ? WHERE HistIdYder = ? and ValidTo is NULL", validTo, histIdYder);
+    		}
         } catch (SQLException e) {
             throw new ParserException(e);
         }

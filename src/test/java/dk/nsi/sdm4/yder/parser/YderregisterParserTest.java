@@ -29,6 +29,9 @@ package dk.nsi.sdm4.yder.parser;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.Instant;
@@ -55,6 +58,8 @@ import dk.nsi.sdm4.yder.YderTestConfiguration;
 @Transactional
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class YderregisterParserTest {
+
+    private final DateFormat datoFormatter = new SimpleDateFormat("yyyyMMdd");
 
     @Configuration
     @PropertySource("classpath:test.properties")
@@ -111,4 +116,21 @@ public class YderregisterParserTest {
         assertEquals(58, jdbcTemplate.queryForInt("select count(*) from Yderregister"));
         assertEquals(54, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson"));
     }
+
+    @Test
+    public void testValidToIsCorrectlyInserted() throws Exception {
+        File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/slet"));
+        parser.process(fileSet);
+        assertEquals("2010-05-11 00:00:00.0", jdbcTemplate.queryForObject("select ValidTo from YderregisterPerson where HistIdPerson = 'C3DA45E0157519C4'", String.class));
+    }
+
+    @Test
+    public void testYderIsUpdatedAndValidToIsCorrectlyInserted() throws Exception {
+        File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/opdater"));
+        parser.process(fileSet);
+        
+        assertEquals(2, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '8783D63E265441C5'"));
+        assertEquals("1986-12-01 00:00:00.0", jdbcTemplate.queryForObject("select ValidTo from Yderregister where HistIdYder = '8783D63E265441C5' and ValidTo is not null", String.class));
+    }
+
 }

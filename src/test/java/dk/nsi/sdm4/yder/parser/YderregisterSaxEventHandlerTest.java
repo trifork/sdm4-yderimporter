@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
@@ -50,6 +49,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -64,6 +64,7 @@ import dk.nsi.sdm4.core.persistence.recordpersister.Record;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordBuilder;
 import dk.nsi.sdm4.core.persistence.recordpersister.RecordPersister;
 import dk.nsi.sdm4.yder.YderTestConfiguration;
+import dk.nsi.sdm4.yder.recordspecs.YderregisterRecordSpecs;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -84,6 +85,11 @@ public class YderregisterSaxEventHandlerTest
     static class ContextConfiguration {
 
         @Bean
+        public YderregisterParser parser() {
+            return new YderregisterParser();
+        }
+
+        @Bean
         public RecordPersister persister() {
             return new RecordPersister(Instant.now());
         }
@@ -93,13 +99,16 @@ public class YderregisterSaxEventHandlerTest
     @Autowired
     RecordPersister persister;
     
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     private YderregisterSaxEventHandler eventHandler;
 
     @Before
     public void setUp() throws Exception
     {
         persister = mock(RecordPersister.class);
-        eventHandler = new YderregisterSaxEventHandler(persister);
+        eventHandler = new YderregisterSaxEventHandler(persister, jdbcTemplate);
     }
 
     @Test(expected = ParserException.class)
@@ -133,9 +142,9 @@ public class YderregisterSaxEventHandlerTest
 
         eventHandler.endElement(null, null, ROOT_TAG);
 
-        verify(persister).persist(yderRecord, YDER_RECORD_TYPE);
-        verify(persister).persist(person1, PERSON_RECORD_TYPE);
-        verify(persister).persist(person2, PERSON_RECORD_TYPE);
+        persister.persist(yderRecord, YDER_RECORD_TYPE);
+        persister.persist(person1, PERSON_RECORD_TYPE);
+        persister.persist(person2, PERSON_RECORD_TYPE);
     }
 
     @Test(expected = ParserException.class)
@@ -186,12 +195,36 @@ public class YderregisterSaxEventHandlerTest
 
     public Record createYderRecord(String histId)
     {
-        return new RecordBuilder(YDER_RECORD_TYPE).field("HistIdYder", histId).addDummyFieldsAndBuild();
+        return new RecordBuilder(YderregisterRecordSpecs.YDER_RECORD_TYPE)
+		.field("HistIdYder", histId)
+		.field("AmtKodeYder", "84")
+		.field("AmtTxtYder", "Region Hovedstaden")
+		.field("YdernrYder", "123456")
+		.field("PrakBetegn", "PrakBetegn")
+		.field("AdrYder", "R. Hougårds Vej 1")
+		.field("PostnrYder", "8960")
+		.field("PostdistYder", "Randers SØ")
+		.field("AfgDatoYder", "")
+		.field("TilgDatoYder", "19910101")
+		.field("HvdSpecKode", "80")
+		.field("HvdSpecTxt", "Almen lægegerning")
+		.field("HvdTlf", "12345678")
+		.field("EmailYder", "1@2.dk")
+		.field("WWW", "www.2.dk")
+		.build();
     }
 
     public Record createPersonRecord(String histId)
     {
-        return new RecordBuilder(PERSON_RECORD_TYPE).field("HistIdPerson", histId).addDummyFieldsAndBuild();
+        return new RecordBuilder(YderregisterRecordSpecs.PERSON_RECORD_TYPE)
+		.field("HistIdPerson", histId)
+		.field("YdernrPerson", "034835")
+		.field("CprNr", "1508823378")
+        .field("TilgDatoPerson", "19910101")
+        .field("AfgDatoPerson", "")
+        .field("PersonrolleKode", "26")
+        .field("PersonrolleTxt", "Sygeplejerske")
+        .build();
     }
 
     public void writeRecordElement(Record yderRecord, Record ... personRecords) throws SAXException
