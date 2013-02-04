@@ -9,7 +9,7 @@
 
 	<artifactId>yderimporter</artifactId>
 	<packaging>war</packaging>
-	<version>4.4-SNAPSHOT</version>
+	<version>4.4</version>
 
     <scm>
         <url>scm:git:git@github.com:trifork/sdm4-yderimporter</url>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>dk.nsi.stamdata4</groupId>
 			<artifactId>sdm-core</artifactId>
-			<version>4.2</version>
+			<version>4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>dk.nsi.stamdata4</groupId>
             <artifactId>testutils</artifactId>
-            <version>4.1</version>
+            <version>4.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

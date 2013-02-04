@@ -34,30 +34,32 @@ import static dk.nsi.sdm4.core.persistence.recordpersister.FieldSpecification.fi
 public class YderregisterRecordSpecs
 {
     public static final RecordSpecification START_RECORD_TYPE = RecordSpecification.createSpecification("DummyTable", "DummyKey",
-            field("OpgDato", 8),
-            field("Timestamp", 20),
-            field("Modt", 6),
-            field("SnitfladeId", 8)
+            field("OpgDato", 8, false),
+            field("Timestamp", 20, false),
+            field("Modt", 6, false),
+            field("SnitfladeId", 8, false)
     );
 
-    public static final RecordSpecification YDER_RECORD_TYPE = RecordSpecification.createSpecification("Yderregister", "HistIdYder",
-            field("HistIdYder", 16),
-            field("AmtKodeYder", 2),
-            field("AmtTxtYder", 60),
-            field("YdernrYder", 6),
-            field("PrakBetegn", 50),
+    public static final RecordSpecification YDER_RECORD_TYPE = RecordSpecification.createSpecification("Yderregister", "Id",
+            // Id is a MD5 of the following fields HistIdYder + YdernrYder + TilgDatoYder, seperated by -
+            field("Id", 32, false),
+            field("HistIdYder", 16, false),
+            field("AmtKodeYder", 2, false),
+            field("AmtTxtYder", 60, false),
+            field("YdernrYder", 6, false),
+            field("PrakBetegn", 50, false),
             // Att
-            field("AdrYder", 50),
-            field("PostnrYder", 4),
-            field("PostdistYder", 20),
-            field("TilgDatoYder", 8),
-            field("AfgDatoYder", 8),
+            field("AdrYder", 50, false),
+            field("PostnrYder", 4, false),
+            field("PostdistYder", 20, false),
+            field("TilgDatoYder", 8, false),
+            field("AfgDatoYder", 8, false),
             // OverensKode
             // OverenskomstTxt
             // LandsYdertypeKode
             // LandsYdertypeTxt
-            field("HvdSpecKode", 2),
-            field("HvdSpecTxt", 60),
+            field("HvdSpecKode", 2, false),
+            field("HvdSpecTxt", 60, false),
             // IndberetFormKode
             // IndberetFormTxt
             // SelskFormKode
@@ -71,22 +73,24 @@ public class YderregisterRecordSpecs
             // SamarbFormTxt
             // PrakKomKode
             // PrakKomTxt
-            field("HvdTlf", 8),
+            field("HvdTlf", 8, false),
             // Fax
-            field("EmailYder", 50),
-            field("WWW", 78)
+            field("EmailYder", 50, false),
+            field("WWW", 78, false)
             // ...
     );
 
-    public static final RecordSpecification PERSON_RECORD_TYPE = RecordSpecification.createSpecification("YderregisterPerson", "HistIdPerson",
-            field("HistIdPerson", 16),
-            field("YdernrPerson", 6),
-            field("TilgDatoPerson", 8),
-            field("AfgDatoPerson", 8),
-            field("CprNr", 10),
+    public static final RecordSpecification PERSON_RECORD_TYPE = RecordSpecification.createSpecification("YderregisterPerson", "Id",
+            // Id is a MD5 of the following fields HistIdPerson + CprNr + YdernrPerson + TilgDatoPerson, seperated by -
+            field("Id", 32, false),
+            field("HistIdPerson", 16, false),
+            field("YdernrPerson", 6, false),
+            field("TilgDatoPerson", 8, false),
+            field("AfgDatoPerson", 8, false),
+            field("CprNr", 10, false),
             // Navn
-            field("PersonrolleKode", 2),
-            field("PersonrolleTxt", 60)
+            field("PersonrolleKode", 2, false),
+            field("PersonrolleTxt", 60, false)
             // ...
     );
 }

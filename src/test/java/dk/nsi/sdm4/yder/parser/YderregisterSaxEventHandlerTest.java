@@ -38,6 +38,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import dk.nsi.sdm4.core.persistence.recordpersister.RecordFetcher;
 import org.joda.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,10 +95,18 @@ public class YderregisterSaxEventHandlerTest
             return new RecordPersister(Instant.now());
         }
 
+        @Bean
+        public RecordFetcher fetcher() {
+            return new RecordFetcher(Instant.now());
+        }
+
     }
 
     @Autowired
     RecordPersister persister;
+
+    @Autowired
+    RecordFetcher fetcher;
     
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -108,7 +117,7 @@ public class YderregisterSaxEventHandlerTest
     public void setUp() throws Exception
     {
         persister = mock(RecordPersister.class);
-        eventHandler = new YderregisterSaxEventHandler(persister, jdbcTemplate);
+        eventHandler = new YderregisterSaxEventHandler(persister, fetcher);
     }
 
     @Test(expected = ParserException.class)
@@ -132,9 +141,9 @@ public class YderregisterSaxEventHandlerTest
 
         writeStartElement(INTERFACE_ID, RECIPIENT_ID, "00001");
 
-        Record yderRecord = createYderRecord("0433514B17DFC5BF");
-        Record person1 = createPersonRecord("C31C77B63CDDC5BF");
-        Record person2 = createPersonRecord("030182BC3CDDC5BF");
+        Record yderRecord = createYderRecord("098f6bcd4621d373cade4e832627b4f6");
+        Record person1 = createPersonRecord("ad0234829205b9033196ba818f7a872b");
+        Record person2 = createPersonRecord("8ad8757baa8564dc136c1e07507f4a98");
 
         writeRecordElement(yderRecord, person1, person2);
 
@@ -193,31 +202,33 @@ public class YderregisterSaxEventHandlerTest
         eventHandler.endElement(null, null, END_TAG);
     }
 
-    public Record createYderRecord(String histId)
+    public Record createYderRecord(String id)
     {
         return new RecordBuilder(YderregisterRecordSpecs.YDER_RECORD_TYPE)
-		.field("HistIdYder", histId)
-		.field("AmtKodeYder", "84")
-		.field("AmtTxtYder", "Region Hovedstaden")
-		.field("YdernrYder", "123456")
-		.field("PrakBetegn", "PrakBetegn")
-		.field("AdrYder", "R. Hougårds Vej 1")
-		.field("PostnrYder", "8960")
-		.field("PostdistYder", "Randers SØ")
-		.field("AfgDatoYder", "")
-		.field("TilgDatoYder", "19910101")
-		.field("HvdSpecKode", "80")
-		.field("HvdSpecTxt", "Almen lægegerning")
-		.field("HvdTlf", "12345678")
-		.field("EmailYder", "1@2.dk")
-		.field("WWW", "www.2.dk")
-		.build();
+                .field("Id", id)
+                .field("HistIdYder", "0433514B17DFC5BF")
+                .field("AmtKodeYder", "84")
+                .field("AmtTxtYder", "Region Hovedstaden")
+                .field("YdernrYder", "123456")
+                .field("PrakBetegn", "PrakBetegn")
+                .field("AdrYder", "R. Hougårds Vej 1")
+                .field("PostnrYder", "8960")
+                .field("PostdistYder", "Randers SØ")
+                .field("AfgDatoYder", "")
+                .field("TilgDatoYder", "19910101")
+                .field("HvdSpecKode", "80")
+                .field("HvdSpecTxt", "Almen lægegerning")
+                .field("HvdTlf", "12345678")
+                .field("EmailYder", "1@2.dk")
+                .field("WWW", "www.2.dk")
+                .build();
     }
 
-    public Record createPersonRecord(String histId)
+    public Record createPersonRecord(String id)
     {
         return new RecordBuilder(YderregisterRecordSpecs.PERSON_RECORD_TYPE)
-		.field("HistIdPerson", histId)
+        .field("Id", id)
+		.field("HistIdPerson", "0433514B17DFC5BF")
 		.field("YdernrPerson", "034835")
 		.field("CprNr", "1508823378")
         .field("TilgDatoPerson", "19910101")
@@ -249,7 +260,6 @@ public class YderregisterSaxEventHandlerTest
         }
         return createAttributes(map);
     }
-
 
     public Attributes createAttributes(String... namesAndValues)
     {

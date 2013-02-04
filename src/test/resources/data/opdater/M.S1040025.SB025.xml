@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <etds1040025XML>
-    <Start OpgDato="20120103" Timestamp="20120103074606065186" Modt="F053  " SnitfladeId="S1040025"></Start>
+    <Start OpgDato="20120104" Timestamp="20120103074606065186" Modt="F053  " SnitfladeId="S1040025"></Start>
     <Yder HistIdYder="CBAF4A6AE728C7BF" AmtKodeYder="84" AmtTxtYder="Region Hovedstaden                                          " YdernrYder="034835" PrakBetegn="Praksis med Cpr = 00000000000                     " AdrYder="R. Hougårds Vej 1                                 " PostnrYder="8960" PostdistYder="Randers SØ          " TilgDatoYder="19910101" AfgDatoYder="        " HvdSpecKode="80" HvdSpecTxt="Almen lægegerning                                           " HvdTlf="12312312" EmailYder="                                                  " WWW="www                                                                           ">
         <Person HistIdPerson="C1DB6992E728C7BF" YdernrPerson="034835" TilgDatoPerson="19910101" AfgDatoPerson="        " CprNr="0000000000" PersonrolleKode="11" PersonrolleTxt="Ejer                                                        "></Person>
     </Yder>

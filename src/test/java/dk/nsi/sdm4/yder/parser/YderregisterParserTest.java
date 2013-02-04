@@ -33,6 +33,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import dk.nsi.sdm4.core.persistence.recordpersister.RecordFetcher;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.Instant;
 import org.junit.Rule;
@@ -75,6 +76,11 @@ public class YderregisterParserTest {
             return new RecordPersister(Instant.now());
         }
 
+        @Bean
+        public RecordFetcher fetcher() {
+            return new RecordFetcher(Instant.now());
+        }
+
     }
 
     @Autowired
@@ -114,7 +120,7 @@ public class YderregisterParserTest {
         parser.process(fileSet);
         
         assertEquals(58, jdbcTemplate.queryForInt("select count(*) from Yderregister"));
-        assertEquals(54, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson"));
+        assertEquals(53, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson"));
     }
 
     @Test
@@ -131,6 +137,32 @@ public class YderregisterParserTest {
         
         assertEquals(2, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '8783D63E265441C5'"));
         assertEquals("1986-12-01 00:00:00.0", jdbcTemplate.queryForObject("select ValidTo from Yderregister where HistIdYder = '8783D63E265441C5' and ValidTo is not null", String.class));
+    }
+
+    @Test
+    public void testYderAndYderPersonIsIgnoredWhenNoChange() {
+        File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
+        parser.process(fileSet);
+        assertEquals(1, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '86BA6DD6513844C7'"));
+        assertEquals(1, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson where HistIdPerson = '446A0F4C31E30AC0'"));
+
+        // Fake old version so we can reimport
+        String sql = "UPDATE YderregisterKeyValue SET Value='20120102' WHERE `key`='Yderregister_version'";
+        jdbcTemplate.update(sql);
+
+        fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
+        parser.process(fileSet);
+        assertEquals(1, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '86BA6DD6513844C7'"));
+        assertEquals(1, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson where HistIdPerson = '446A0F4C31E30AC0'"));
+    }
+
+    @Test
+    public void testUpdate() {
+        File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
+        parser.process(fileSet);
+        fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/opdater"));
+        parser.process(fileSet);
+        assertEquals(2, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '8783D63E265441C5'"));
     }
 
 }

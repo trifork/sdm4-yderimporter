@@ -1,0 +1,5 @@
+ALTER TABLE `Yderregister` ADD COLUMN `Id` VARCHAR(32) NOT NULL  AFTER `PID`
+, ADD INDEX `IdxId` (`Id` ASC) ;
+
+ALTER TABLE `YderregisterPerson` ADD COLUMN `Id` VARCHAR(32) NOT NULL  AFTER `PID`
+, ADD INDEX `idxId` (`Id` ASC) ;

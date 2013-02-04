@@ -31,6 +31,7 @@ import java.io.File;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import dk.nsi.sdm4.core.persistence.recordpersister.RecordFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,6 +53,9 @@ public class YderregisterParser implements Parser {
     @Autowired
     private RecordPersister persister;
 
+    @Autowired
+    private RecordFetcher fetcher;
+
     YderregisterSaxEventHandler eventHandler;
     
     @Autowired
@@ -63,7 +67,7 @@ public class YderregisterParser implements Parser {
     
     @Override
     public void process(File dataSet) throws ParserException {
-        eventHandler = new YderregisterSaxEventHandler(persister, jdbcTemplate);
+        eventHandler = new YderregisterSaxEventHandler(persister, fetcher);
     
         SLALogItem slaLogItem = slaLogger.createLogItem("YderregisterParser", dataSet != null ? dataSet.getName() : "no input file");
         try {
