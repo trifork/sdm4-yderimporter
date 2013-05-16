@@ -233,6 +233,10 @@ public class YderregisterSaxEventHandler extends DefaultHandler {
                         // The fetched record was not valid
                         if (isValidAtTransactionTime(currentRecordWithMeta)) {
                             // Current record is valid but fetched was not, fine just insert
+                            if (fetchedRecordWithMeta.getValidTo().isAfter(currentValidFrom)) {
+                                fetchedRecordWithMeta.setValidTo(currentValidFrom);
+                                persister.update(fetchedRecordWithMeta, specification);
+                            }
                             persistAt(currentRecord, specification, currentValidFrom, currentValidTo);
                         } else {
                             // Neither one of the records was valid update the existing
