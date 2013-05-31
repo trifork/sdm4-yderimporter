@@ -101,7 +101,7 @@ public class YderregisterParserTest {
         jdbcTemplate.update(sql);
         
         File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         
     }
 
@@ -111,13 +111,13 @@ public class YderregisterParserTest {
         jdbcTemplate.update(sql);
         
         File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
     }
 
     @Test
     public void testThatFileContentAreParsed() throws Exception {
         File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         
         assertEquals(58, jdbcTemplate.queryForInt("select count(*) from Yderregister"));
         assertEquals(53, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson"));
@@ -126,14 +126,14 @@ public class YderregisterParserTest {
     @Test
     public void testValidToIsCorrectlyInserted() throws Exception {
         File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/slet"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         assertEquals("2010-05-11 00:00:00.0", jdbcTemplate.queryForObject("select ValidTo from YderregisterPerson where HistIdPerson = 'C3DA45E0157519C4'", String.class));
     }
 
     @Test
     public void testYderIsUpdatedAndValidToIsCorrectlyInserted() throws Exception {
         File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/opdater"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         
         assertEquals(2, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '8783D63E265441C5'"));
         assertEquals("1986-12-01 00:00:00.0", jdbcTemplate.queryForObject("select ValidTo from Yderregister where HistIdYder = '8783D63E265441C5' and ValidTo is not null", String.class));
@@ -142,7 +142,7 @@ public class YderregisterParserTest {
     @Test
     public void testYderAndYderPersonIsIgnoredWhenNoChange() {
         File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         assertEquals(1, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '86BA6DD6513844C7'"));
         assertEquals(1, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson where HistIdPerson = '446A0F4C31E30AC0'"));
 
@@ -151,7 +151,7 @@ public class YderregisterParserTest {
         jdbcTemplate.update(sql);
 
         fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         assertEquals(1, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '86BA6DD6513844C7'"));
         assertEquals(1, jdbcTemplate.queryForInt("select count(*) from YderregisterPerson where HistIdPerson = '446A0F4C31E30AC0'"));
     }
@@ -159,9 +159,9 @@ public class YderregisterParserTest {
     @Test
     public void testUpdate() {
         File fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/yderregister/csc"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         fileSet = FileUtils.toFile(getClass().getClassLoader().getResource("data/opdater"));
-        parser.process(fileSet);
+        parser.process(fileSet, "");
         assertEquals(2, jdbcTemplate.queryForInt("select count(*) from Yderregister where HistIdYder = '8783D63E265441C5'"));
     }
 

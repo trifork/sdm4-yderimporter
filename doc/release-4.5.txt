@@ -1,4 +1,0 @@
-SDM4-Yderimporter 4.5 Release Notes
-=============================
-* Fixed SDM-35 Yderimport fejler
-* Tilføjet indexer på Yderregister og YderregisterPerson så import og kopiregister service går markant hurtigere

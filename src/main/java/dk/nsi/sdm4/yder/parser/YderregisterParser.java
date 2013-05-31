@@ -66,11 +66,14 @@ public class YderregisterParser implements Parser {
     }
     
     @Override
-    public void process(File dataSet) throws ParserException {
+    public void process(File dataSet, String identifier) throws ParserException {
         eventHandler = new YderregisterSaxEventHandler(persister, fetcher);
-    
-        SLALogItem slaLogItem = slaLogger.createLogItem("YderregisterParser", dataSet != null ? dataSet.getName() : "no input file");
+
+        SLALogItem slaLogItem = slaLogger.createLogItem(getHome()+".process", "SDM4."+getHome()+".process");
+        slaLogItem.setMessageId(identifier);
+        slaLogItem.addCallParameter(Parser.SLA_INPUT_NAME, dataSet.getAbsolutePath());
         try {
+            long processed = 0;
             SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 
             // Make sure that all the required file are there.
